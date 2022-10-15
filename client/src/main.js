@@ -355,11 +355,6 @@ export default function Main() {
           </Grid>
         </Box>
       </div>
-      <button onClick={postCarte}>Post Carte</button>
-      <button onClick={getCartes}>Get Carte</button>
-      <button onClick={postUser}>Post User</button>
-      <button onClick={getUser}>Get User</button>
-      <button onClick={getTemplates}>Get Templates</button>
     </>
   );
 }
