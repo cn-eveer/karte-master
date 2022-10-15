@@ -49,7 +49,7 @@ function App() {
     <div className="App">
       <AppBar position="absolute">
         <Toolbar variant="dense">
-          <Link to="/home">
+          <Link to="/">
             <IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
               <HomeIcon />
             </IconButton>
