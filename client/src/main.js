@@ -2,10 +2,10 @@ import './main.scss';
 import image from './logo192.png';
 import { Link } from 'react-router-dom';
 import * as React from 'react';
-import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
+import Input from '@mui/material/Input';
 import List from '@mui/material/List';
+import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
 import Divider from '@mui/material/Divider';
 import AppBar from '@mui/material/AppBar';
@@ -15,11 +15,30 @@ import IconButton from '@mui/material/IconButton';
 import HomeIcon from '@mui/icons-material/Home';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import InputAdornment from '@mui/material/InputAdornment';
 
 export default function Main() {
   const [selectedIndex, setSelectedIndex] = React.useState(null);
+  const [selectCreate, setSelectCreate] = React.useState(false);
   const handleListItemClick = (event, index) => {
     setSelectedIndex(index);
+  };
+
+  const [formValues, setFormValues] = React.useState({
+    Subjective: '',
+    Objective: '',
+    Assessment: '',
+    Plan: '',
+  });
+
+  const handleChange = (prop) => (event) => {
+    setFormValues({ ...formValues, [prop]: event.target.value });
+  };
+
+  const onSubmit = () => {
+    console.log(formValues);
   };
 
   const data_sample = [
@@ -69,7 +88,14 @@ export default function Main() {
               </div>
               <div className="profile">
                 <div className="profile__button">
-                  <button>カルテを作成</button>
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      setSelectCreate(true);
+                    }}
+                  >
+                    カルテ作成
+                  </Button>
                 </div>
                 <div className="profile__name">
                   <div className="profile__name__read">ヤマダ　タロウ</div>
@@ -94,56 +120,90 @@ export default function Main() {
               </div>
             </Grid>
             <Divider orientation="vertical" flexItem />
-            <Grid container xs={8}>
-              <Grid xs={4}>
-                <div className="details">
-                  <div className="carte_list">
-                    <h3>カルテ一覧</h3>
-                    <List>
-                      {data_sample.map((item, index) => {
-                        return (
-                          <ListItemButton
-                            selected={selectedIndex === index}
-                            onClick={(event) => handleListItemClick(event, index)}
-                          >
-                            <ListItemText primary={item.date} />
-                          </ListItemButton>
-                        );
-                      })}
-                    </List>
+
+            {!selectCreate ? (
+              <Grid container xs={8}>
+                <Grid xs={4}>
+                  <div className="details">
+                    <div className="carte_list">
+                      <h3>カルテ一覧</h3>
+                      <List>
+                        {data_sample.map((item, index) => {
+                          return (
+                            <ListItemButton
+                              selected={selectedIndex === index}
+                              onClick={(event) => handleListItemClick(event, index)}
+                            >
+                              <ListItemText primary={item.date} />
+                            </ListItemButton>
+                          );
+                        })}
+                      </List>
+                    </div>
                   </div>
-                </div>
-              </Grid>
-              <Divider orientation="vertical" flexItem />
-              <Grid xs>
-                <div className="carte__info">
-                  {selectedIndex !== null ? (
-                    <>
-                      <h3>カルテ詳細</h3>
-                      <div className="carte__info__title">
-                        <h2>
-                          ID: {data_sample[selectedIndex].id} {data_sample[selectedIndex].date}
-                        </h2>
-                      </div>
-                      <div className="carte__info__body">
-                        <div className="carte__info__body__info">S: 頭痛い</div>
-                        <div className="Main__details__cartes__info__body__info">
-                          O:
-                          <div className="Main__details__cartes__info__body__info_sub">O:</div>
-                          <div className="Main__details__cartes__info__body__info_sub">P:</div>
-                          <div className="Main__details__cartes__info__body__info_sub">Q:</div>
-                          <div className="Main__details__cartes__info__body__info_sub">R:</div>
+                </Grid>
+                <Divider orientation="vertical" flexItem />
+                <Grid xs>
+                  <div className="carte__info">
+                    {selectedIndex !== null ? (
+                      <>
+                        <h3>カルテ詳細</h3>
+                        <div className="carte__info__title">
+                          <h2>
+                            ID: {data_sample[selectedIndex].id} {data_sample[selectedIndex].date}
+                          </h2>
                         </div>
-                        <div className="carte__info__body__info">A: OO</div>
-                        <div className="carte__info__body__info">P: XX</div>
-                      </div>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                </div>
+                        <div className="carte__info__body">
+                          <div className="carte__info__body__info">S: 頭痛い</div>
+                          <div className="Main__details__cartes__info__body__info">
+                            O:
+                            <div className="Main__details__cartes__info__body__info_sub">O:</div>
+                            <div className="Main__details__cartes__info__body__info_sub">P:</div>
+                            <div className="Main__details__cartes__info__body__info_sub">Q:</div>
+                            <div className="Main__details__cartes__info__body__info_sub">R:</div>
+                          </div>
+                          <div className="carte__info__body__info">A: OO</div>
+                          <div className="carte__info__body__info">P: XX</div>
+                        </div>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                  </div>
+                </Grid>
               </Grid>
-            </Grid>
+            ) : (
+              <Grid xs>
+                <Grid container>
+                  <Grid xs>
+                    <div>
+                      <h3>カルテ作成</h3>
+                    </div>
+                  </Grid>
+                  <Button
+                    position="float"
+                    variant="outlined"
+                    color="primary"
+                    type="submit"
+                    onClick={onSubmit}
+                  >
+                    Submit
+                  </Button>
+                </Grid>
+                {Object.keys(formValues).map((key) => {
+                  return (
+                    <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+                      <InputLabel>{key}</InputLabel>
+                      <Input
+                        value={formValues[key]}
+                        onChange={handleChange(key)}
+                        startAdornment={<InputAdornment position="start">{key[0]}</InputAdornment>}
+                      />
+                    </FormControl>
+                  );
+                })}
+              </Grid>
+            )}
           </Grid>
         </Box>
       </div>
