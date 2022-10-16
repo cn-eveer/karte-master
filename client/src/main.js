@@ -42,6 +42,7 @@ export default function Main() {
     Objective: {},
     Assessment: '',
     Plan: '',
+    disease: '',
   });
 
   const [objectiveData, setObjectiveData] = React.useState({});
@@ -86,6 +87,7 @@ export default function Main() {
       Subjective: formValues.Subjective,
       Objective: objectiveSub,
       Assessment: formValues.Assessment,
+      disease: disease,
       Plan: formValues.Plan,
     })
       .then()
@@ -162,6 +164,7 @@ export default function Main() {
     'Symptoms:「他にどんな症状がありますか」',
     'Time course:「最初はどのように始まり、どのような経過で、今はどうですか。」',
   ];
+  const shintai = ['髄膜刺激徴候（項部硬直など）', '瞳孔の左右差', '側頭動脈の圧痛', '皮疹の有無'];
 
   return (
     <>
@@ -231,13 +234,60 @@ export default function Main() {
                             return (
                               <Box style={{ padding: 25, textAlign: 'left' }}>
                                 <h4>{key}</h4>
-                                {key === 'objective' ? (
+                                {console.log(cartesData[selectedIndex].disease)}
+                                {key === 'objective' &&
+                                cartesData[selectedIndex].disease === '頭痛' ? (
                                   <>
-                                    {Object.keys(objectiveSubDisplay).map((keyO) => {
+                                    {order.map((keyO) => {
                                       return (
-                                        <div>
-                                          {keyO} : {objectiveSubDisplay[keyO]}
-                                        </div>
+                                        <Container style={{ marginBottom: 35 }}>
+                                          <div style={{ fontWeight: 700, marginBottom: 15 }}>
+                                            {keyO}
+                                          </div>
+
+                                          {keyO === 'バイタルサイン' &&
+                                            vital.map((field) => {
+                                              return (
+                                                <>
+                                                  <div>{field}</div>
+                                                  {cartesData[selectedIndex][field] !==
+                                                  undefined ? (
+                                                    <div>cartesData[selectedIndex][field]</div>
+                                                  ) : (
+                                                    <div>-</div>
+                                                  )}
+                                                </>
+                                              );
+                                            })}
+                                          {keyO === '問診' &&
+                                            monshin.map((field) => {
+                                              return (
+                                                <>
+                                                  <div>{field}</div>
+                                                  {cartesData[selectedIndex][field] !==
+                                                  undefined ? (
+                                                    <div>cartesData[selectedIndex][field]</div>
+                                                  ) : (
+                                                    <div>-</div>
+                                                  )}
+                                                </>
+                                              );
+                                            })}
+                                          {keyO === '身体診察' &&
+                                            shintai.map((field) => {
+                                              return (
+                                                <>
+                                                  <div>{field}</div>
+                                                  {cartesData[selectedIndex][field] !==
+                                                  undefined ? (
+                                                    <div>cartesData[selectedIndex][field]</div>
+                                                  ) : (
+                                                    <div>-</div>
+                                                  )}
+                                                </>
+                                              );
+                                            })}
+                                        </Container>
                                       );
                                     })}
                                   </>

@@ -60,13 +60,22 @@ app.post("/carte", (req, res) => {
   const objective = JSON.stringify(req.body.Objective);
   const assessment = req.body.Assessment;
   const plan = req.body.Plan;
+  const disease = req.body.disease;
   const date = new Date();
-  console.log([user_id, subjective, objective, assessment, plan, date]);
+  console.log([
+    user_id,
+    subjective,
+    objective,
+    assessment,
+    plan,
+    date,
+    disease,
+  ]);
   const sqlInsert =
-    "INSERT INTO cartes(user_id,subjective,objective,assessment,plan,date) VALUES (?,?,?,?,?,?)";
+    "INSERT INTO cartes(user_id,subjective,objective,assessment,plan,date, disease) VALUES (?,?,?,?,?,?,?)";
   db.query(
     sqlInsert,
-    [user_id, subjective, objective, assessment, plan, date],
+    [user_id, subjective, objective, assessment, plan, date, disease],
     (err, result) => {
       res.send(result);
     }
