@@ -8,7 +8,7 @@ import List from '@mui/material/List';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
 import Divider from '@mui/material/Divider';
-
+import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography';
 
 import ListItemButton from '@mui/material/ListItemButton';
@@ -27,6 +27,31 @@ export default function Main() {
 
   const [objectiveSub, setObjectiveSub] = React.useState({});
   const [objectiveSubDisplay, setObjectiveSubDisplay] = React.useState({});
+
+  const word = {
+    体温: [],
+    血圧: [],
+    脈拍: [],
+    呼吸数: [],
+    'Onset:「いつから痛みは始まりしたか」': ['突然', '急激'],
+    'Palliative&Provoke:「どんな時に良く/悪くなりますか。」': [],
+    'Quality&Quantity:「どのような/どれくらいの痛みですか」': [
+      '激しい',
+      '今までに経験したことのない',
+      '初めて',
+    ],
+    'Region:「どこが痛いのか,指差してください': [],
+    'Symptoms:「他にどんな症状がありますか」': ['悪心', '嘔吐', 'めまい'],
+    'Time course:「最初はどのように始まり、どのような経過で、今はどうですか。」': [],
+    既往歴: ['あり'],
+    服薬歴: ['あり'],
+    '髄膜刺激徴候（項部硬直など）': ['あり'],
+    眼内出血: ['あり'],
+    うっ血乳頭: ['あり'],
+    瞳孔の左右差: ['あり'],
+    側頭動脈の圧痛: ['あり'],
+    痙攣: ['あり'],
+  };
 
   const [userValues, setUserValues] = React.useState({
     user_id: 0,
@@ -48,13 +73,23 @@ export default function Main() {
   const [objectiveData, setObjectiveData] = React.useState({});
   const [disease, setDisease] = React.useState('');
   const [template, setTemplate] = React.useState([]);
-
+  const [danger, setDanger] = React.useState({});
   const handleChange = (prop) => (event) => {
     setFormValues({ ...formValues, [prop]: event.target.value });
   };
 
   const handleChangeObejective = (prop) => (event) => {
+    console.log(word[prop]);
     setObjectiveSub({ ...objectiveSub, [prop]: event.target.value });
+
+    for (const item of word[prop]) {
+      if (event.target.value.includes(item)) {
+        console.log('TRUE');
+        setDanger({ ...danger, [prop]: true });
+        return;
+      }
+    }
+    setDanger({ ...danger, [prop]: false });
   };
 
   const createObjective = (data) => {
@@ -163,8 +198,17 @@ export default function Main() {
     'Region:「どこが痛いのか,指差してください',
     'Symptoms:「他にどんな症状がありますか」',
     'Time course:「最初はどのように始まり、どのような経過で、今はどうですか。」',
+    '既往歴',
+    '服薬歴',
   ];
-  const shintai = ['髄膜刺激徴候（項部硬直など）', '瞳孔の左右差', '側頭動脈の圧痛', '皮疹の有無'];
+  const shintai = [
+    '髄膜刺激徴候（項部硬直など）',
+    '眼内出血',
+    'うっ血乳頭',
+    '瞳孔の左右差',
+    '側頭動脈の圧痛',
+    '痙攣',
+  ];
 
   return (
     <>
@@ -234,7 +278,6 @@ export default function Main() {
                             return (
                               <Box style={{ padding: 25, textAlign: 'left' }}>
                                 <h4>{key}</h4>
-                                {console.log(cartesData[selectedIndex].disease)}
                                 {key === 'objective' &&
                                 cartesData[selectedIndex].disease === '頭痛' ? (
                                   <>
@@ -355,7 +398,6 @@ export default function Main() {
                           <Grid container alignItems="center" direction="columns">
                             <Grid>Objective</Grid>
                             {/* Objectives 項目を表示 */}
-                            {console.log(objectiveData)}
 
                             {!selectDisease ? (
                               template.map((item, index) => {
@@ -386,6 +428,7 @@ export default function Main() {
                                 </Grid>
                                 <Grid>
                                   {/* Objectives 項目をINPUT 表示 */}
+                                  {console.log(danger)}
                                   <Grid container>
                                     {disease === '頭痛' &&
                                       order.map((field, index) => {
@@ -399,6 +442,50 @@ export default function Main() {
                                                 {Object.keys(objectiveData[field]).map(
                                                   (subfield) => {
                                                     return (
+                                                      <>
+                                                        {danger[subfield] && (
+                                                          <Alert
+                                                            variant="outlined"
+                                                            severity="warning"
+                                                          >
+                                                            危険度 高
+                                                          </Alert>
+                                                        )}
+                                                        <FormControl
+                                                          key={subfield}
+                                                          fullWidth
+                                                          sx={{ m: 1 }}
+                                                          variant="standard"
+                                                          style={{ marginBottom: 15, padding: 10 }}
+                                                        >
+                                                          {/* Objectives 以外の表示 */}
+                                                          <InputLabel>{subfield}</InputLabel>
+                                                          <Input
+                                                            value={objectiveSub[subfield]}
+                                                            onChange={handleChangeObejective(
+                                                              subfield,
+                                                            )}
+                                                          />
+                                                        </FormControl>
+                                                      </>
+                                                    );
+                                                  },
+                                                )}
+                                              </>
+                                            )}
+                                            {field === '問診' && (
+                                              <>
+                                                {monshin.map((subfield) => {
+                                                  return (
+                                                    <>
+                                                      {danger[subfield] && (
+                                                        <Alert
+                                                          variant="outlined"
+                                                          severity="warning"
+                                                        >
+                                                          危険度 高
+                                                        </Alert>
+                                                      )}
                                                       <FormControl
                                                         key={subfield}
                                                         fullWidth
@@ -415,30 +502,7 @@ export default function Main() {
                                                           )}
                                                         />
                                                       </FormControl>
-                                                    );
-                                                  },
-                                                )}
-                                              </>
-                                            )}
-                                            {field === '問診' && (
-                                              <>
-                                                {monshin.map((subfield) => {
-                                                  return (
-                                                    <FormControl
-                                                      key={subfield}
-                                                      fullWidth
-                                                      sx={{ m: 1 }}
-                                                      variant="standard"
-                                                      style={{ marginBottom: 15, padding: 10 }}
-                                                    >
-                                                      {/* Objectives 以外の表示 */}
-                                                      {console.log(subfield)}
-                                                      <InputLabel>{subfield}</InputLabel>
-                                                      <Input
-                                                        value={objectiveSub[subfield]}
-                                                        onChange={handleChangeObejective(subfield)}
-                                                      />
-                                                    </FormControl>
+                                                    </>
                                                   );
                                                 })}
                                               </>
@@ -455,7 +519,6 @@ export default function Main() {
                                                       style={{ marginBottom: 15, padding: 10 }}
                                                     >
                                                       {/* Objectives 以外の表示 */}
-                                                      {console.log(subfield)}
                                                       <InputLabel>{subfield}</InputLabel>
                                                       <Input
                                                         value={objectiveSub[subfield]}
