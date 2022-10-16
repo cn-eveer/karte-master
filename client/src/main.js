@@ -1,6 +1,4 @@
 import './main.scss';
-import image from './logo192.png';
-import { Link } from 'react-router-dom';
 import * as React from 'react';
 import Axios from 'axios';
 import Box from '@mui/material/Box';
@@ -10,17 +8,17 @@ import List from '@mui/material/List';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
 import Divider from '@mui/material/Divider';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
+
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import HomeIcon from '@mui/icons-material/Home';
+
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import InputAdornment from '@mui/material/InputAdornment';
 
+import AppBarComp from './appbar';
+import Profile from './profile';
 export default function Main() {
   const [selectedIndex, setSelectedIndex] = React.useState(null);
   const [selectDisease, setSelectDisease] = React.useState(false);
@@ -47,7 +45,7 @@ export default function Main() {
   });
 
   const [objectiveData, setObjectiveData] = React.useState({});
-
+  const [disease, setDisease] = React.useState('');
   const [template, setTemplate] = React.useState([]);
 
   const handleChange = (prop) => (event) => {
@@ -61,6 +59,7 @@ export default function Main() {
   const createObjective = (data) => {
     setSelectDisease(true);
     setObjectiveData(data.item);
+    setDisease(data.disease_name);
   };
   const createCarte = () => {
     setSelectCreate(true);
@@ -153,21 +152,21 @@ export default function Main() {
   };
   const [cartesData, setCartesData] = React.useState([{}]);
 
+  const order = ['バイタルサイン', '問診', '身体診察'];
+  const vital = ['体温', '血圧', '脈拍', '呼吸数'];
+  const monshin = [
+    'Onset:「いつから痛みは始まりしたか」',
+    'Palliative&Provoke:「どんな時に良く/悪くなりますか。」',
+    'Quality&Quantity:「どのような/どれくらいの痛みですか」',
+    'Region:「どこが痛いのか,指差してください',
+    'Symptoms:「他にどんな症状がありますか」',
+    'Time course:「最初はどのように始まり、どのような経過で、今はどうですか。」',
+  ];
+
   return (
     <>
+      <AppBarComp />
       <div className="Main" style={{ padding: 10 }}>
-        <AppBar position="absolute">
-          <Toolbar variant="dense">
-            <Link to="/home">
-              <IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
-                <HomeIcon />
-              </IconButton>
-            </Link>
-            <Typography variant="h7" color="inherit" component="div">
-              患者管理画面
-            </Typography>
-          </Toolbar>
-        </AppBar>
         <Box style={{ marginTop: 80 }}>
           <Grid container spacing={2} style={{ height: '100%' }}>
             <Grid xs={3}>
@@ -181,29 +180,7 @@ export default function Main() {
                   患者検索
                 </Button>
               </div>
-              <div className="profile" style={{ paddingTop: 15, minHeight: '70%' }}>
-                <div className="profile__name">
-                  <div className="profile__name__read">{userValues.furigana}</div>
-                  <div className="profile__name__proper">
-                    <h2>{userValues.name}</h2>
-                  </div>
-                </div>
-                <div className="profile__avatar">
-                  <img src={image} alt="avatar_image" />
-                </div>
-                <div className="profile__info">
-                  <div className="profile__info__title">
-                    <h3>基本情報</h3>
-                  </div>
-                  <div className="profile__info__details" style={{ padding: 15 }}>
-                    <div className="profile__info__details__gender">性別:{userValues.sex}</div>
-                    <div className="profile__info__details__age">年齢: {userValues.age} 歳</div>
-                    <div className="profile__info__details__age">
-                      生年月日:{formatData(userValues.birthdate)}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <Profile values={userValues} />
             </Grid>
             <Divider orientation="vertical" flexItem />
 
@@ -214,7 +191,7 @@ export default function Main() {
                     <div className="carte_list">
                       <h3>カルテ一覧</h3>
                       {userValues.user_id !== 0 && (
-                        <Button variant="outlined" onClick={createCarte}>
+                        <Button variant="outlined" onClick={() => createCarte()}>
                           カルテ作成
                         </Button>
                       )}
@@ -280,6 +257,7 @@ export default function Main() {
               </Grid>
             ) : (
               <Grid xs>
+                {/* カルテの作成 */}
                 <Container>
                   <Grid container>
                     <Button color="secondary" type="submit" onClick={() => setSelectCreate(false)}>
@@ -303,6 +281,7 @@ export default function Main() {
                         variant="standard"
                         style={{ marginBottom: 15, padding: 10 }}
                       >
+                        {/* Objectives 以外の表示 */}
                         <InputLabel>{key}</InputLabel>
                         <Input
                           multiline
@@ -316,22 +295,28 @@ export default function Main() {
                       </FormControl>
                     ) : (
                       <div style={{ border: '1px solid', marginBottom: 35, padding: 45 }}>
+                        {/* Objectives 表示 */}
                         <Grid
                           container
                           direction="row"
                           justifyContent="flex-start"
                           alignItems="center"
                         >
-                          <Grid container alignItems="center">
+                          <Grid container alignItems="center" direction="columns">
                             <Grid>Objective</Grid>
+                            {/* Objectives 項目を表示 */}
+                            {console.log(objectiveData)}
 
                             {!selectDisease ? (
-                              template.map((item) => {
+                              template.map((item, index) => {
                                 return (
-                                  <Grid xs key={item.disease_name}>
+                                  <Grid xs key={`${item.disease_name}-${index}`}>
+                                    {/* disease の選択*/}
                                     <Button
                                       variant="outlined"
-                                      onClick={() => createObjective(item)}
+                                      onClick={() => {
+                                        createObjective(item);
+                                      }}
                                     >
                                       {item.disease_name}
                                     </Button>
@@ -340,24 +325,102 @@ export default function Main() {
                               })
                             ) : (
                               <>
-                                <Button
-                                  color="secondary"
-                                  type="submit"
-                                  onClick={() => setSelectDisease(false)}
-                                >
-                                  キャンセル
-                                </Button>
-                                {Object.keys(objectiveData).map((datakey, index) => {
-                                  return (
-                                    <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-                                      <InputLabel>{datakey}</InputLabel>
-                                      <Input
-                                        value={objectiveSub[key]}
-                                        onChange={handleChangeObejective(datakey)}
-                                      />
-                                    </FormControl>
-                                  );
-                                })}
+                                <Grid>
+                                  <Button
+                                    color="secondary"
+                                    type="submit"
+                                    onClick={() => setSelectDisease(false)}
+                                  >
+                                    キャンセル
+                                  </Button>
+                                </Grid>
+                                <Grid>
+                                  {/* Objectives 項目をINPUT 表示 */}
+                                  <Grid container>
+                                    {disease === '頭痛' &&
+                                      order.map((field, index) => {
+                                        return (
+                                          <Grid container>
+                                            <Grid>
+                                              <h4>{field}</h4>
+                                            </Grid>
+                                            {field !== '問診' && field !== 'バイタルサイン' && (
+                                              <>
+                                                {Object.keys(objectiveData[field]).map(
+                                                  (subfield) => {
+                                                    return (
+                                                      <FormControl
+                                                        key={subfield}
+                                                        fullWidth
+                                                        sx={{ m: 1 }}
+                                                        variant="standard"
+                                                        style={{ marginBottom: 15, padding: 10 }}
+                                                      >
+                                                        {/* Objectives 以外の表示 */}
+                                                        <InputLabel>{subfield}</InputLabel>
+                                                        <Input
+                                                          value={objectiveSub[subfield]}
+                                                          onChange={handleChangeObejective(
+                                                            subfield,
+                                                          )}
+                                                        />
+                                                      </FormControl>
+                                                    );
+                                                  },
+                                                )}
+                                              </>
+                                            )}
+                                            {field === '問診' && (
+                                              <>
+                                                {monshin.map((subfield) => {
+                                                  return (
+                                                    <FormControl
+                                                      key={subfield}
+                                                      fullWidth
+                                                      sx={{ m: 1 }}
+                                                      variant="standard"
+                                                      style={{ marginBottom: 15, padding: 10 }}
+                                                    >
+                                                      {/* Objectives 以外の表示 */}
+                                                      {console.log(subfield)}
+                                                      <InputLabel>{subfield}</InputLabel>
+                                                      <Input
+                                                        value={objectiveSub[subfield]}
+                                                        onChange={handleChangeObejective(subfield)}
+                                                      />
+                                                    </FormControl>
+                                                  );
+                                                })}
+                                              </>
+                                            )}
+                                            {field === 'バイタルサイン' && (
+                                              <>
+                                                {vital.map((subfield) => {
+                                                  return (
+                                                    <FormControl
+                                                      key={subfield}
+                                                      fullWidth
+                                                      sx={{ m: 1 }}
+                                                      variant="standard"
+                                                      style={{ marginBottom: 15, padding: 10 }}
+                                                    >
+                                                      {/* Objectives 以外の表示 */}
+                                                      {console.log(subfield)}
+                                                      <InputLabel>{subfield}</InputLabel>
+                                                      <Input
+                                                        value={objectiveSub[subfield]}
+                                                        onChange={handleChangeObejective(subfield)}
+                                                      />
+                                                    </FormControl>
+                                                  );
+                                                })}
+                                              </>
+                                            )}
+                                          </Grid>
+                                        );
+                                      })}
+                                  </Grid>
+                                </Grid>
                               </>
                             )}
                           </Grid>
