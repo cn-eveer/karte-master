@@ -60,12 +60,13 @@ app.post("/carte", (req, res) => {
   const objective = JSON.stringify(req.body.Objective);
   const assessment = req.body.Assessment;
   const plan = req.body.Plan;
-  console.log([user_id, subjective, assessment, plan]);
+  const date = new Date();
+  console.log([user_id, subjective, objective, assessment, plan, date]);
   const sqlInsert =
-    "INSERT INTO cartes(user_id,subjective,objective,assessment,plan) VALUES (?,?,?,?,?)";
+    "INSERT INTO cartes(user_id,subjective,objective,assessment,plan,date) VALUES (?,?,?,?,?,?)";
   db.query(
     sqlInsert,
-    [user_id, subjective, objective, assessment, plan],
+    [user_id, subjective, objective, assessment, plan, date],
     (err, result) => {
       res.send(result);
     }
@@ -80,7 +81,3 @@ app.get("/templates", (req, res) => {
 });
 
 app.listen(3001);
-
-/*
-                  template.map((item) => item.disease_name
-*/
