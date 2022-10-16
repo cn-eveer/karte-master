@@ -27,9 +27,8 @@ export default function Main() {
   const [selectCreate, setSelectCreate] = React.useState(false);
   const [searchId, setSearchId] = React.useState('');
 
-  const handleListItemClick = (event, index) => {
-    setSelectedIndex(index);
-  };
+  const [objectiveSub, setObjectiveSub] = React.useState({});
+  const [objectiveSubDisplay, setObjectiveSubDisplay] = React.useState({});
 
   const [userValues, setUserValues] = React.useState({
     user_id: 0,
@@ -42,7 +41,7 @@ export default function Main() {
 
   const [formValues, setFormValues] = React.useState({
     Subjective: '',
-    Objective: '',
+    Objective: {},
     Assessment: '',
     Plan: '',
   });
@@ -52,13 +51,14 @@ export default function Main() {
   const [template, setTemplate] = React.useState([]);
 
   const handleChange = (prop) => (event) => {
-    console.log(prop);
     setFormValues({ ...formValues, [prop]: event.target.value });
-    console.log(formValues[prop]);
+  };
+
+  const handleChangeObejective = (prop) => (event) => {
+    setObjectiveSub({ ...objectiveSub, [prop]: event.target.value });
   };
 
   const createObjective = (data) => {
-    console.log(data);
     setSelectDisease(true);
     setObjectiveData(data.item);
   };
@@ -72,7 +72,6 @@ export default function Main() {
   const onSubmit = () => postCarte();
 
   const getCartes = () => {
-    console.log('CLICKED');
     Axios.get('http://localhost:3001/cartes', { params: { user_id: searchId } })
       .then((res) => {
         setCartesData(res.data);
@@ -85,7 +84,10 @@ export default function Main() {
   const postCarte = () => {
     Axios.post('http://localhost:3001/carte', {
       user_id: userValues.user_id,
-      ...formValues,
+      Subjective: formValues.Subjective,
+      Objective: objectiveSub,
+      Assessment: formValues.Assessment,
+      Plan: formValues.Plan,
     })
       .then()
       .catch((error) => {
@@ -93,6 +95,7 @@ export default function Main() {
       })
       .finally(() => {
         setSelectCreate(false);
+        setSelectDisease(false);
         getUser();
         setFormValues({
           Subjective: '',
@@ -100,6 +103,7 @@ export default function Main() {
           Assessment: '',
           Plan: '',
         });
+        setObjectiveSub({});
       });
   };
 
@@ -137,16 +141,16 @@ export default function Main() {
       });
   };
 
-  const getTemplates = () => {
-    Axios.get('http://localhost:3001/templates').then((res) => {
-      console.log(res);
-    });
+  const formatData = (data) => {
+    return data !== undefined ? data.split('T')[0] : '-';
   };
 
-  const formatData = () => {
-    return userValues.birthdate.split('T')[0];
+  const formatJson = (data) => {
+    setObjectiveSubDisplay(JSON.parse(data));
   };
-
+  const handleListItemClick = (event, index) => {
+    setSelectedIndex(index);
+  };
   const [cartesData, setCartesData] = React.useState([{}]);
 
   return (
@@ -194,7 +198,9 @@ export default function Main() {
                   <div className="profile__info__details" style={{ padding: 15 }}>
                     <div className="profile__info__details__gender">性別:{userValues.sex}</div>
                     <div className="profile__info__details__age">年齢: {userValues.age} 歳</div>
-                    <div className="profile__info__details__age">生年月日:{formatData()}</div>
+                    <div className="profile__info__details__age">
+                      生年月日:{formatData(userValues.birthdate)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -218,10 +224,13 @@ export default function Main() {
                             <ListItemButton
                               key={index}
                               selected={selectedIndex === index}
-                              onClick={(event) => handleListItemClick(event, index)}
+                              onClick={(event) => {
+                                handleListItemClick(event, index);
+                                formatJson(cartesData[index].objective);
+                              }}
                               style={{ border: '0.1px solid', marginBottom: 5 }}
                             >
-                              <ListItemText primary={item.carte_id} />
+                              <ListItemText primary={formatData(item.date)} />
                             </ListItemButton>
                           );
                         })}
@@ -237,17 +246,27 @@ export default function Main() {
                       <>
                         <h3>カルテ詳細</h3>
                         <div className="carte__info__title">
-                          <h2>
-                            ID: {cartesData[selectedIndex].carte_id}
-                            {cartesData[selectedIndex].date}
-                          </h2>
+                          <h2>{formatData(cartesData[selectedIndex].date)}</h2>
+                          <h3> ID: {cartesData[selectedIndex].carte_id}</h3>
                         </div>
                         <Typography className="carte__info__body">
                           {['subjective', 'objective', 'assessment', 'plan'].map((key) => {
                             return (
                               <Box style={{ padding: 25, textAlign: 'left' }}>
                                 <h4>{key}</h4>
-                                <div>{cartesData[selectedIndex][key]}</div>
+                                {key === 'objective' ? (
+                                  <>
+                                    {Object.keys(objectiveSubDisplay).map((keyO) => {
+                                      return (
+                                        <div>
+                                          {keyO} : {objectiveSubDisplay[keyO]}
+                                        </div>
+                                      );
+                                    })}
+                                  </>
+                                ) : (
+                                  <div>{cartesData[selectedIndex][key]}</div>
+                                )}
                               </Box>
                             );
                           })}
@@ -309,7 +328,7 @@ export default function Main() {
                             {!selectDisease ? (
                               template.map((item) => {
                                 return (
-                                  <Grid xs>
+                                  <Grid xs key={item.disease_name}>
                                     <Button
                                       variant="outlined"
                                       onClick={() => createObjective(item)}
@@ -328,16 +347,14 @@ export default function Main() {
                                 >
                                   キャンセル
                                 </Button>
-                                {Object.keys(objectiveData).map((key) => {
+                                {Object.keys(objectiveData).map((datakey, index) => {
                                   return (
-                                    <FormControl
-                                      key={key}
-                                      fullWidth
-                                      sx={{ m: 1 }}
-                                      variant="standard"
-                                    >
-                                      <InputLabel>{key}</InputLabel>
-                                      <Input value={formValues[key]} onChange={handleChange(key)} />
+                                    <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+                                      <InputLabel>{datakey}</InputLabel>
+                                      <Input
+                                        value={objectiveSub[key]}
+                                        onChange={handleChangeObejective(datakey)}
+                                      />
                                     </FormControl>
                                   );
                                 })}
@@ -348,7 +365,6 @@ export default function Main() {
                       </div>
                     );
                   })}
-                  {console.log(template.map((item) => item.disease_name))}
                 </Container>
               </Grid>
             )}

@@ -4,6 +4,8 @@
   "private": true,
   "main": "public/electron.js",
   "homepage": "./",
+  "author": "eagles+",
+  "description": "Karte Master",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -16,7 +18,30 @@
     "react-scripts": "5.0.1",
     "react-window": "^1.8.7",
     "sass": "^1.55.0",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "electron": "^21.1.1",
+    "electron-builder": "^23.6.0",
+    "electron-is-dev": "^2.0.0"
+  },
+  "build": {
+    "appId": "com.electron.kartemaster",
+    "productName": "Karte Master",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "public"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "deb"
+    }
   },
   "scripts": {
     "start": "react-scripts start",
@@ -27,7 +52,8 @@
     "dev": "concurrently -k \"BROWSER=none npm run start\" \"npm:electron\"",
     "electron": "wait-on tcp:3000 && electron .",
     "format": "prettier --check ./src",
-    "format:fix": "prettier --write ./src"
+    "format:fix": "prettier --write ./src",
+    "package": "npm run build && electron-builder build -m -c.extraMetadata.main=build/electron.js --publish never"
   },
   "eslintConfig": {
     "extends": [
@@ -54,6 +80,7 @@
     "@mui/material": "^5.10.9",
     "concurrently": "^7.4.0",
     "electron": "^21.1.1",
+    "electron-builder": "^23.6.0",
     "electron-is-dev": "^2.0.0",
     "prettier": "^2.7.1",
     "wait-on": "^6.0.1"
